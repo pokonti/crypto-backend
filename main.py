@@ -12,6 +12,7 @@ origins = [
     "http://localhost:5173",
     "http://localhost",
     "http://localhost:8000",
+    "https://crypto-frontend-cly7.vercel.app"
 ]
 
 app.add_middleware(
