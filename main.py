@@ -12,7 +12,9 @@ origins = [
     "http://localhost:5173",
     "http://localhost",
     "http://localhost:8000",
-    "https://crypto-frontend-cly7.vercel.app"
+    "https://crypto-frontend-cly7.vercel.app",
+    "https://crypto-frontend-cly7-pokontis-projects.vercel.app",
+
 ]
 
 app.add_middleware(
@@ -51,7 +53,7 @@ coin_data_cache = {}
 def get_coin_chart(coin_id: str, vs_currency: str = "usd", days: int = 7):
     current_time = time.time()
 
-    if coin_id in coin_cache and current_time - coin_cache[coin_id]['timestamp'] < CACHE_TIMEOUT:
+    if coin_id in coin_cache and current_time - coin_cache[coin_id]['timestamp'] < 1200:
         return coin_cache[coin_id]['data']
     data = fetch_coin_chart(coin_id, vs_currency, days)
 
@@ -65,7 +67,7 @@ def get_coin_chart(coin_id: str, vs_currency: str = "usd", days: int = 7):
 def get_coin(coin_id: str, response_model=CryptoInfo):
     current_time = time.time()
 
-    if coin_id in coin_data_cache and current_time - coin_data_cache[coin_id]['timestamp'] < CACHE_TIMEOUT:
+    if coin_id in coin_data_cache and current_time - coin_data_cache[coin_id]['timestamp'] < 1200:
         return coin_data_cache[coin_id]['data']
     data = fetch_detailed_info(coin_id)
 
