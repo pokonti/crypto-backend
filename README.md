@@ -10,8 +10,9 @@ This is the frontend part of the Crypto application. The app provides real-time 
 * The user interface is designed to show up-to-date data and give immediate feedback in case of errors or no data available for a given currency.
 * The backend updates cryptocurrency data every 60 seconds, using background tasks
 * Prikol'nyi loading states to improve the user experience
-
-
+* **Redis-powered chatbot memory** stores each user’s session for 10 minutes
+* **JWT Authentication system**
+* **PostgreSQL database** for storing users and portfolio data
 ## Technologies Used
 * **React.js:** Frontend framework for building the user interface
 * **FastAPI:** Backend framework for connection API and frontend side
@@ -20,12 +21,15 @@ This is the frontend part of the Crypto application. The app provides real-time 
 * **Gemini API:** For the AI Assistant to provide market insights and advice
 * **Recharts:** For visualizing cryptocurrency price changes over time with interactive charts
 * **Skeleton:** Used for engaging and smooth loading states, improving user experience during data fetching
-
+* **PostgreSQL** Stores user and portfolio data
+* **Redis** Stores chatbot memory (auto-expiring after 10 minutes)
+* 
 ## Installation and Setup
 ### Prerequisites
 * Ensure that you have Node.js and npm installed.
 * You will also need Python 3.8+ and pip installed for setting up the backend (FastAPI).
-
+* PostgreSQL running locally or remotely
+* Redis server (or Redis Cloud)
 ### Backend Setup
 
 1. Clone the repository:
@@ -66,9 +70,9 @@ The backend runs in an asynchronous manner, fetching updated cryptocurrency data
 - Also deployment was a little bit tiring process
 
 ### Future Improvements
-- Authorization
-- Saving portfolio data (by connecting to database)
-- Saving AI chat (by connecting to database)
+- Authentication(done)
+- Saving portfolio data (by connecting to database)(done)
+- Saving AI chat (by connecting to database)(done)
 - A new component with only cryptocurrency news
 
 
