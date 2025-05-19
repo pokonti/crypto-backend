@@ -79,6 +79,9 @@ The backend runs in an asynchronous manner, fetching updated cryptocurrency data
 ### Frontend Link
 https://github.com/pokonti/crypto-frontend
 
+### Video Link 
+https://youtu.be/ppptfSeewVo
+
 
 
 
