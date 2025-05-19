@@ -11,13 +11,10 @@ class Crypto(BaseModel):
     change_24h: float
 
 
-class PromptRequest(BaseModel):
-    prompt: str
-
-
 class CryptoInfo(BaseModel):
     description: str
     whitepaper: str
+    currency: float
     price_change_percentage_24h: float
     price_change_percentage_7d: float
     price_change_percentage_14d: float

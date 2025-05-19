@@ -1,11 +1,14 @@
-import asyncio
 from fastapi import FastAPI, Query, HTTPException
+import asyncio
 from typing import List
-from logic import supported_currencies, cached_data, cryptos_cache, run_background_tasks, fetch_coin_chart, \
-    chat_with_gemini, CACHE_TIMEOUT, fetch_detailed_info
-from models import Crypto, PromptRequest, CryptoInfo
+from crypto.logic import supported_currencies, cached_data, cryptos_cache, run_background_tasks, fetch_coin_chart, fetch_detailed_info
+from crypto.schemas import Crypto
 from fastapi.middleware.cors import CORSMiddleware
 import time
+from db.database import engine, Base
+from auth import auth
+from portfolio import portfolio
+from chatbot import chatbot
 app = FastAPI()
 
 origins = [
@@ -50,7 +53,7 @@ async def get_cryptos():
 coin_cache = {}
 coin_data_cache = {}
 @app.get("/chart/{coin_id}")
-def get_coin_chart(coin_id: str, vs_currency: str = "usd", days: int = 7):
+async def get_coin_chart(coin_id: str, vs_currency: str = "usd", days: int = 7):
     current_time = time.time()
 
     if coin_id in coin_cache and current_time - coin_cache[coin_id]['timestamp'] < 1200:
@@ -64,7 +67,7 @@ def get_coin_chart(coin_id: str, vs_currency: str = "usd", days: int = 7):
     return data
 
 @app.get("/{coin_id}")
-def get_coin(coin_id: str, response_model=CryptoInfo):
+async def get_coin(coin_id: str):
     current_time = time.time()
 
     if coin_id in coin_data_cache and current_time - coin_data_cache[coin_id]['timestamp'] < 1200:
@@ -77,24 +80,8 @@ def get_coin(coin_id: str, response_model=CryptoInfo):
     }
     return data
 
-
-@app.post("/chat")
-async def chat(request: PromptRequest):
-    return {"response": chat_with_gemini(request.prompt)}
-
-
-# @app.get("/test-updates")
-# async def test_updates():
-#     fetch_exchange_rate()
-#     fetch_crypto_data_kzt()
-#     fetch_cryptos()
-#
-#     fetch_exchange_rate()
-#     fetch_crypto_data_kzt()
-#     fetch_cryptos()
-#
-#     return {
-#         "exchange_rate": exchange_rates,
-#         "crypto_data": bool(cached_data),
-#         "cryptos_cache": len(cryptos_cache)
-#     }
+# Base.metadata.drop_all(bind=engine)
+Base.metadata.create_all(bind=engine)
+app.include_router(auth.router)
+app.include_router(portfolio.router)
+app.include_router(chatbot.router)

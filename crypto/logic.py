@@ -1,9 +1,6 @@
 import asyncio
 import requests
-from models import Crypto, CryptoInfo
-from google import genai
-import os
-from dotenv import load_dotenv
+from crypto.schemas import Crypto, CryptoInfo
 
 exchange_rates = {"usd_to_kzt": 0}
 cached_data = {}
@@ -11,9 +8,6 @@ supported_currencies = ["usd", "eur", "kzt"]
 cryptos_cache = []
 CACHE_TIMEOUT = 60
 
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
 
 def fetch_exchange_rate():
     try:
@@ -98,7 +92,6 @@ def fetch_cryptos():
     except Exception as e:
         print(f"Error fetching cryptos: {e}")
 
-    return None
 
 
 def fetch_coin_chart(coin_id: str, vs_currency: str, days: int):
@@ -110,10 +103,8 @@ def fetch_coin_chart(coin_id: str, vs_currency: str, days: int):
     try:
         response = requests.get(url, params=params)
 
-        if response.status_code != 200:
-            return {"error": "Failed to fetch data"}
-
-        return response.json()
+        if response.status_code == 200:
+            return response.json()
 
     except Exception as e:
         print(f"Error fetching crypto chart: {e}")
@@ -123,25 +114,25 @@ def fetch_detailed_info(coin_id: str):
     try:
         response = requests.get(url)
 
-        if response.status_code != 200:
-            return {"error": "Failed to fetch data"}
+        if response.status_code == 200:
+            data = response.json()
+            description = data.get("description", {}).get("en", "")
+            whitepaper = data.get("links", {}).get("whitepaper")
+            market_data = data.get("market_data", {})
+            current_price = market_data.get("current_price", {})
 
-        data = response.json()
-        description = data.get("description", {}).get("en", "")
-        whitepaper = data.get("links", {}).get("whitepaper")
-        market_data = data.get("market_data", {})
-
-        return CryptoInfo(
-            description=description,
-            whitepaper=whitepaper,
-            price_change_percentage_24h=market_data.get("price_change_percentage_24h", 0),
-            price_change_percentage_7d=market_data.get("price_change_percentage_7d", 0),
-            price_change_percentage_14d=market_data.get("price_change_percentage_14d", 0),
-            price_change_percentage_30d=market_data.get("price_change_percentage_30d", 0),
-            price_change_percentage_60d=market_data.get("price_change_percentage_60d", 0),
-            price_change_percentage_200d=market_data.get("price_change_percentage_200d", 0),
-            price_change_percentage_1y=market_data.get("price_change_percentage_1y", 0),
-        )
+            return CryptoInfo(
+                description=description,
+                whitepaper=whitepaper,
+                currency=current_price.get("usd", 0),
+                price_change_percentage_24h=market_data.get("price_change_percentage_24h", 0),
+                price_change_percentage_7d=market_data.get("price_change_percentage_7d", 0),
+                price_change_percentage_14d=market_data.get("price_change_percentage_14d", 0),
+                price_change_percentage_30d=market_data.get("price_change_percentage_30d", 0),
+                price_change_percentage_60d=market_data.get("price_change_percentage_60d", 0),
+                price_change_percentage_200d=market_data.get("price_change_percentage_200d", 0),
+                price_change_percentage_1y=market_data.get("price_change_percentage_1y", 0),
+            )
 
     except Exception as e:
         print(f"Unexpected error: {e}")
@@ -163,16 +154,16 @@ async def run_background_tasks():
         await asyncio.sleep(CACHE_TIMEOUT)
 
 
-def chat_with_gemini(prompt: str):
+def fetch_price_for_portfolio(coin_id:str) :
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}"
     try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[prompt]
-        )
-        # print(response.text)
-        return response.text
-    except Exception as e:
-        print(f"Error fetching response from AI: {e}")
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            # current_price_usd = data["market_data"]["current_price"]["usd"]
+            return data.get("market_data", {}).get("current_price", {}).get("usd")
 
+    except Exception as e:
+        print(f"Error fetching price data: {e}")
 
 
